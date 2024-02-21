@@ -109,19 +109,19 @@ impl Store {
         WHERE id = $4 AND account_id = $5
         RETURNING id, title, content, tags",
         )
-        .bind(question.title)
-        .bind(question.content)
-        .bind(question.tags)
-        .bind(id)
-        .bind(account_id.0)
-        .map(|row: PgRow| Question {
-            id: QuestionId(row.get("id")),
-            title: row.get("title"),
-            content: row.get("content"),
-            tags: row.get("tags"),
-        })
-        .fetch_one(&self.connection)
-        .await
+            .bind(question.title)
+            .bind(question.content)
+            .bind(question.tags)
+            .bind(id)
+            .bind(account_id.0)
+            .map(|row: PgRow| Question {
+                id: QuestionId(row.get("id")),
+                title: row.get("title"),
+                content: row.get("content"),
+                tags: row.get("tags"),
+            })
+            .fetch_one(&self.connection)
+            .await
         {
             Ok(question) => Ok(question),
             Err(error) => {
@@ -152,18 +152,19 @@ impl Store {
         account_id: AccountId,
     ) -> Result<Answer, Error> {
         match sqlx::query(
-            "INSERT INTO answers (content, corresponding_question, account_id) VALUES ($1, $2, $3)",
+            "INSERT INTO answers (content, corresponding_question, account_id) VALUES ($1, $2, $3) RETURNING id, content, corresponding_question",
         )
-        .bind(new_answer.content)
-        .bind(new_answer.question_id.0)
-        .bind(account_id.0)
-        .map(|row: PgRow| Answer {
-            id: AnswerId(row.get("id")),
-            content: row.get("content"),
-            question_id: QuestionId(row.get("question_id")),
-        })
-        .fetch_one(&self.connection)
-        .await
+            .bind(new_answer.content)
+            .bind(new_answer.question_id.0)
+            .bind(account_id.0)
+            .map(|row: PgRow|
+                Answer {
+                    id: AnswerId(row.get("id")),
+                    content: row.get("content"),
+                    question_id: QuestionId(row.get("corresponding_question")),
+                })
+            .fetch_one(&self.connection)
+            .await
         {
             Ok(answer) => Ok(answer),
             Err(error) => {
