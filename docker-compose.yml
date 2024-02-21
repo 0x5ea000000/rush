@@ -1,21 +1,23 @@
 version: "3.7"
 services:
-  # database:
-  #   image: postgres
-  #   restart: always
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - data:/var/lib/postgresql/data
+  database:
+    image: postgres
+    restart: always
+    env_file:
+      - .env.docker
+    ports:
+      - "5532:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
   server:
+    restart: always
     build:
       context: .
       dockerfile: Dockerfile
-    env_file: .env
-    # depends_on:
-    #   - database
+    env_file:
+      - .env.docker
+    depends_on:
+      - database
     networks:
       - default
     ports:

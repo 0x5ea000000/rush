@@ -23,6 +23,6 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/rush ./
-COPY --from=builder /app/.env ./
+COPY --from=builder /app/.env.docker ./.env
 
-CMD ["/app/rush"]
+CMD ["/app/rush", "--db-password", ""]
