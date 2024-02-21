@@ -19,5 +19,8 @@ Cargo.lock
 # Vscode config files
 .vscode
 
-#Environment variables
+# Environment variables
 .env
+
+# Log files
+stderr.log
