@@ -4,7 +4,7 @@ use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{http::Method, Filter};
 
 use rush::errors::{return_error, Error};
-use rush::{config, routes, store};
+use rush::{config, routes, stores};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -15,7 +15,7 @@ async fn main() -> Result<(), Error> {
         config.log_level, config.log_level, config.log_level
     );
 
-    let store = store::Store::new(&format!(
+    let store = stores::postgres_store::PostgresStore::new(&format!(
         "postgres://{}:{}@{}:{}/{}",
         config.db_user, config.db_password, config.db_host, config.db_port, config.db_name
     ))
@@ -74,6 +74,15 @@ async fn main() -> Result<(), Error> {
         .and(warp::body::json())
         .and_then(routes::question::add_question);
 
+    let add_ai_answer = warp::post()
+        .and(warp::path("questions"))
+        .and(warp::path::param::<i32>())
+        .and(warp::path("answer"))
+        .and(warp::path::end())
+        .and(routes::authentication::auth())
+        .and(store_filter.clone())
+        .and_then(routes::question::add_answer);
+
     let add_answer = warp::post()
         .and(warp::path("answers"))
         .and(warp::path::end())
@@ -100,6 +109,7 @@ async fn main() -> Result<(), Error> {
         .or(update_question)
         .or(add_question)
         .or(delete_question)
+        .or(add_ai_answer)
         .or(add_answer)
         .or(registration)
         .or(login)

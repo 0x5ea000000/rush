@@ -11,11 +11,11 @@ use crate::types::{
 };
 
 #[derive(Debug, Clone)]
-pub struct Store {
+pub struct PostgresStore {
     pub connection: PgPool,
 }
 
-impl Store {
+impl PostgresStore {
     pub async fn new(db_url: &str) -> Result<Self, sqlx::Error> {
         tracing::warn!("{}", db_url);
         let db_pool = PgPoolOptions::new()
@@ -23,7 +23,7 @@ impl Store {
             .connect(db_url)
             .await?;
 
-        Ok(Store {
+        Ok(PostgresStore {
             connection: db_pool,
         })
     }
@@ -46,6 +46,29 @@ impl Store {
             .await
         {
             Ok(questions) => Ok(questions),
+            Err(e) => {
+                tracing::event!(tracing::Level::ERROR, "{:?}", e);
+                Err(Error::DatabaseQueryError(e))
+            }
+        }
+    }
+
+    pub async fn get_question(
+        &self,
+        question_id: i32,
+    ) -> Result<Question, Error> {
+        match sqlx::query("SELECT * from questions where id = $1")
+            .bind(question_id)
+            .map(|row: PgRow| Question {
+            id: QuestionId(row.get("id")),
+            title: row.get("title"),
+            content: row.get("content"),
+            tags: row.get("tags"),
+        })
+            .fetch_optional(&self.connection)
+            .await
+        {
+            Ok(question) => Ok(question.unwrap()),
             Err(e) => {
                 tracing::event!(tracing::Level::ERROR, "{:?}", e);
                 Err(Error::DatabaseQueryError(e))

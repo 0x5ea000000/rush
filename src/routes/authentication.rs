@@ -7,7 +7,7 @@ use chrono::prelude::*;
 use warp::{http::StatusCode, Filter};
 
 use crate::errors::Error;
-use crate::store::Store;
+use crate::stores::postgres_store::PostgresStore as Store;
 use crate::types::account::{Account, AccountId, Session};
 
 pub async fn register(store: Store, account: Account) -> Result<impl warp::Reply, warp::Rejection> {

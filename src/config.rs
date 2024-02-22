@@ -5,6 +5,16 @@ use dotenv;
 
 use crate::errors::Error;
 
+pub const GOOGLE_AI_KEY: &str = "GOOGLE_AI_KEY";
+pub const PASETO_KEY: &str = "PASETO_KEY";
+pub const PORT: &str = "PORT";
+pub const POSTGRES_USER: &str = "POSTGRES_USER";
+pub const POSTGRES_PASSWORD: &str = "POSTGRES_PASSWORD";
+pub const POSTGRES_HOST: &str = "POSTGRES_HOST";
+pub const POSTGRES_PORT: &str = "POSTGRES_PORT";
+pub const POSTGRES_DB: &str = "POSTGRES_DB";
+
+
 /// Q&A web service API
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -16,7 +26,7 @@ pub struct Config {
     #[clap(short, long, default_value = "8080")]
     pub port: u16,
     /// Database user
-    #[clap(long, default_value = "username")]
+    #[clap(long, default_value = "postgres")]
     pub db_user: String,
     /// Database user
     #[clap(long)]
@@ -28,7 +38,7 @@ pub struct Config {
     #[clap(long, default_value = "5432")]
     pub db_port: u16,
     /// Database name
-    #[clap(long, default_value = "rustwebdev")]
+    #[clap(long, default_value = "rush")]
     pub db_name: String,
 }
 
@@ -37,25 +47,25 @@ impl Config {
         dotenv::dotenv().ok();
         let config = Config::parse();
 
-        // if let Err(_) = env::var("BAD_WORDS_API_KEY") {
-        //     panic!("BadWords API key not set");
-        // }
+        if let Err(_) = env::var(GOOGLE_AI_KEY) {
+            panic!("Google_AI_KEY not set");
+        }
 
-        if let Err(_) = env::var("PASETO_KEY") {
+        if let Err(_) = env::var(PASETO_KEY) {
             panic!("PASETO_KEY not set");
         }
 
-        let port = std::env::var("PORT")
+        let port = std::env::var(PORT)
             .ok()
             .map(|val| val.parse::<u16>())
             .unwrap_or(Ok(config.port))
             .map_err(|e| Error::ParseError(e))?;
 
-        let db_user = env::var("POSTGRES_USER").unwrap_or(config.db_user.to_owned());
-        let db_password = env::var("POSTGRES_PASSWORD").unwrap();
-        let db_host = env::var("POSTGRES_HOST").unwrap_or(config.db_host.to_owned());
-        let db_port = env::var("POSTGRES_PORT").unwrap_or(config.db_port.to_string());
-        let db_name = env::var("POSTGRES_DB").unwrap_or(config.db_name.to_owned());
+        let db_user = env::var(POSTGRES_USER).unwrap_or(config.db_user.to_owned());
+        let db_password = env::var(POSTGRES_PASSWORD).unwrap();
+        let db_host = env::var(POSTGRES_HOST).unwrap_or(config.db_host.to_owned());
+        let db_port = env::var(POSTGRES_PORT).unwrap_or(config.db_port.to_string());
+        let db_name = env::var(POSTGRES_DB).unwrap_or(config.db_name.to_owned());
 
         Ok(Config {
             log_level: config.log_level,
