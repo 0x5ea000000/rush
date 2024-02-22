@@ -8,7 +8,6 @@ use rush::errors::{return_error, Error};
 use rush::{config, routes};
 use rush::config::DatabaseType;
 use rush::repositories::memory_repository::MemoryRepository;
-
 use rush::repositories::repository::Repository;
 use rush::repositories::postgres_repository::PostgresRepository;
 
