@@ -1,16 +1,19 @@
 use std::{env, future};
 
+
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{password_hash, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use chrono::prelude::*;
+
 use warp::{http::StatusCode, Filter};
 
 use crate::errors::Error;
-use crate::stores::postgres_store::PostgresStore as Store;
+use crate::repositories::repository::Repository;
 use crate::types::account::{Account, AccountId, Session};
 
-pub async fn register(store: Store, account: Account) -> Result<impl warp::Reply, warp::Rejection> {
+
+pub async fn register(store: Repository, account: Account) -> Result<impl warp::Reply, warp::Rejection> {
     let hashed_password = match hash_password(account.password.as_bytes()) {
         Ok(hash) => hash,
         Err(e) => return Err(warp::reject::custom(Error::PasswordHashLibraryError(e))),
@@ -28,7 +31,8 @@ pub async fn register(store: Store, account: Account) -> Result<impl warp::Reply
     }
 }
 
-pub async fn login(store: Store, login: Account) -> Result<impl warp::Reply, warp::Rejection> {
+
+pub async fn login(store: Repository, login: Account) -> Result<impl warp::Reply, warp::Rejection> {
     match store.get_account(login.email).await {
         Ok(account) => match verify_password(&account.password, login.password.as_bytes()) {
             Ok(verified) => {

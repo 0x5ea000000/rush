@@ -1,12 +1,15 @@
-use warp::http::StatusCode;
 
-use crate::stores::postgres_store::PostgresStore as Store;
+
+use warp::http::StatusCode;
+use crate::repositories::repository::Repository;
+
 use crate::types::account::Session;
 use crate::types::answer::NewAnswer;
 
+
 pub async fn add_answer(
     session: Session,
-    store: Store,
+    store: Repository,
     new_answer: NewAnswer,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     let account_id = session.account_id;

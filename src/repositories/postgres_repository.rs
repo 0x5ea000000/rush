@@ -1,9 +1,11 @@
+use async_trait::async_trait;
 use sqlx::{
     postgres::{PgPool, PgPoolOptions, PgRow},
     Row,
 };
 
 use crate::errors::Error;
+use crate::repositories::repository::{RepositoryPort};
 use crate::types::{
     account::{Account, AccountId},
     answer::{Answer, AnswerId, NewAnswer},
@@ -11,11 +13,11 @@ use crate::types::{
 };
 
 #[derive(Debug, Clone)]
-pub struct PostgresStore {
+pub struct PostgresRepository {
     pub connection: PgPool,
 }
 
-impl PostgresStore {
+impl PostgresRepository {
     pub async fn new(db_url: &str) -> Result<Self, sqlx::Error> {
         tracing::warn!("{}", db_url);
         let db_pool = PgPoolOptions::new()
@@ -23,13 +25,16 @@ impl PostgresStore {
             .connect(db_url)
             .await?;
 
-        Ok(PostgresStore {
+        Ok(PostgresRepository {
             connection: db_pool,
         })
     }
+}
 
-    pub async fn get_questions(
-        self,
+#[async_trait]
+impl RepositoryPort for PostgresRepository {
+    async fn get_questions(
+        &self,
         limit: Option<i32>,
         offset: i32,
     ) -> Result<Vec<Question>, Error> {
@@ -52,19 +57,18 @@ impl PostgresStore {
             }
         }
     }
-
-    pub async fn get_question(
+    async fn get_question(
         &self,
         question_id: i32,
     ) -> Result<Question, Error> {
         match sqlx::query("SELECT * from questions where id = $1")
             .bind(question_id)
             .map(|row: PgRow| Question {
-            id: QuestionId(row.get("id")),
-            title: row.get("title"),
-            content: row.get("content"),
-            tags: row.get("tags"),
-        })
+                id: QuestionId(row.get("id")),
+                title: row.get("title"),
+                content: row.get("content"),
+                tags: row.get("tags"),
+            })
             .fetch_optional(&self.connection)
             .await
         {
@@ -75,8 +79,7 @@ impl PostgresStore {
             }
         }
     }
-
-    pub async fn is_question_owner(
+    async fn is_question_owner(
         &self,
         question_id: i32,
         account_id: &AccountId,
@@ -94,9 +97,8 @@ impl PostgresStore {
             }
         }
     }
-
-    pub async fn add_question(
-        self,
+    async fn add_question(
+        &self,
         new_question: NewQuestion,
         account_id: AccountId,
     ) -> Result<Question, Error> {
@@ -120,9 +122,8 @@ impl PostgresStore {
             }
         }
     }
-
-    pub async fn update_question(
-        self,
+    async fn update_question(
+        &self,
         question: Question,
         id: i32,
         account_id: AccountId,
@@ -153,8 +154,7 @@ impl PostgresStore {
             }
         }
     }
-
-    pub async fn delete_question(self, id: i32, account_id: AccountId) -> Result<bool, Error> {
+    async fn delete_question(&self, id: i32, account_id: AccountId) -> Result<bool, Error> {
         match sqlx::query("DELETE FROM questions WHERE id = $1 AND account_id = $2")
             .bind(id)
             .bind(account_id.0)
@@ -168,9 +168,8 @@ impl PostgresStore {
             }
         }
     }
-
-    pub async fn add_answer(
-        self,
+    async fn add_answer(
+        &self,
         new_answer: NewAnswer,
         account_id: AccountId,
     ) -> Result<Answer, Error> {
@@ -207,8 +206,7 @@ impl PostgresStore {
             }
         }
     }
-
-    pub async fn add_account(self, account: Account) -> Result<bool, Error> {
+    async fn add_account(&self, account: Account) -> Result<bool, Error> {
         match sqlx::query("INSERT INTO accounts (email, password) VALUES ($1, $2)")
             .bind(account.email)
             .bind(account.password)
@@ -233,8 +231,7 @@ impl PostgresStore {
             }
         }
     }
-
-    pub async fn get_account(self, email: String) -> Result<Account, Error> {
+    async fn get_account(&self, email: String) -> Result<Account, Error> {
         match sqlx::query("SELECT * from accounts where email = $1")
             .bind(email)
             .map(|row: PgRow| Account {

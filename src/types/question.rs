@@ -8,7 +8,7 @@ pub struct Question {
     pub tags: Option<Vec<String>>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash, Copy)]
 pub struct QuestionId(pub i32);
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

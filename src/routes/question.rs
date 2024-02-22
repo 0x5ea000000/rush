@@ -1,20 +1,22 @@
 use std::collections::HashMap;
 
-use tracing::{event, instrument, Level};
+
+
+use tracing::{event, Level};
 use warp::http::StatusCode;
 
 use crate::errors::Error;
+use crate::repositories::repository::Repository;
 use crate::services::google_ai_service::get_ai_content;
-use crate::stores::postgres_store::PostgresStore as Store;
 use crate::types::account::Session;
 use crate::types::answer::NewAnswer;
 use crate::types::pagination::{extract_pagination, Pagination};
 use crate::types::question::{NewQuestion, Question, QuestionId};
 
-#[instrument]
+
 pub async fn get_questions(
     params: HashMap<String, String>,
-    store: Store,
+    store: Repository,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     event!(target: "practical_rust_book", Level::INFO, "querying questions");
     let mut pagination = Pagination::default();
@@ -33,10 +35,11 @@ pub async fn get_questions(
     }
 }
 
+
 pub async fn update_question(
     id: i32,
     session: Session,
-    store: Store,
+    store: Repository,
     question: Question,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     let account_id = session.account_id;
@@ -56,10 +59,11 @@ pub async fn update_question(
     }
 }
 
+
 pub async fn delete_question(
     id: i32,
     session: Session,
-    store: Store,
+    store: Repository,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     let account_id = session.account_id;
     if store.is_question_owner(id, &account_id).await? {
@@ -75,9 +79,10 @@ pub async fn delete_question(
     }
 }
 
+
 pub async fn add_question(
     session: Session,
-    store: Store,
+    store: Repository,
     new_question: NewQuestion,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     let account_id = session.account_id;
@@ -97,7 +102,7 @@ pub async fn add_question(
 pub async fn add_answer(
     id: i32,
     session: Session,
-    store: Store,
+    store: Repository,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     let account_id = session.account_id;
 
@@ -112,9 +117,10 @@ pub async fn add_answer(
     };
 
     let answer = NewAnswer {
-        content: content,
+        content,
         question_id: QuestionId(id),
     };
+
 
     match store.add_answer(answer, account_id).await {
         Ok(_) => Ok(warp::reply::with_status("Answer added", StatusCode::OK)),

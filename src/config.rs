@@ -1,7 +1,7 @@
 use std::env;
 
-use clap::Parser;
-use dotenv;
+use clap::{Parser, ValueEnum};
+use dotenv::dotenv;
 
 use crate::errors::Error;
 
@@ -14,6 +14,14 @@ pub const POSTGRES_HOST: &str = "POSTGRES_HOST";
 pub const POSTGRES_PORT: &str = "POSTGRES_PORT";
 pub const POSTGRES_DB: &str = "POSTGRES_DB";
 
+pub const DB_TYPE: &str = "DB_TYPE";
+
+#[derive(ValueEnum, Debug, Clone)] // ArgEnum here
+#[clap(rename_all = "kebab_case")]
+pub enum DatabaseType {
+    Postgres,
+    Memory,
+}
 
 /// Q&A web service API
 #[derive(Parser, Debug)]
@@ -29,7 +37,7 @@ pub struct Config {
     #[clap(long, default_value = "postgres")]
     pub db_user: String,
     /// Database user
-    #[clap(long)]
+    #[clap(long, default_value = "")]
     pub db_password: String,
     /// URL for the postgres database
     #[clap(long, default_value = "localhost")]
@@ -40,18 +48,21 @@ pub struct Config {
     /// Database name
     #[clap(long, default_value = "rush")]
     pub db_name: String,
+    /// Database type
+    #[clap(long, value_enum, default_value = "postgres")]
+    pub db_type: DatabaseType,
 }
 
 impl Config {
     pub fn new() -> Result<Config, Error> {
-        dotenv::dotenv().ok();
+        dotenv().ok();
         let config = Config::parse();
 
-        if let Err(_) = env::var(GOOGLE_AI_KEY) {
+        if env::var(GOOGLE_AI_KEY).is_err() {
             panic!("Google_AI_KEY not set");
         }
 
-        if let Err(_) = env::var(PASETO_KEY) {
+        if env::var(PASETO_KEY).is_err() {
             panic!("PASETO_KEY not set");
         }
 
@@ -59,13 +70,21 @@ impl Config {
             .ok()
             .map(|val| val.parse::<u16>())
             .unwrap_or(Ok(config.port))
-            .map_err(|e| Error::ParseError(e))?;
+            .map_err(Error::ParseError)?;
 
         let db_user = env::var(POSTGRES_USER).unwrap_or(config.db_user.to_owned());
         let db_password = env::var(POSTGRES_PASSWORD).unwrap();
         let db_host = env::var(POSTGRES_HOST).unwrap_or(config.db_host.to_owned());
         let db_port = env::var(POSTGRES_PORT).unwrap_or(config.db_port.to_string());
         let db_name = env::var(POSTGRES_DB).unwrap_or(config.db_name.to_owned());
+        let db_type = match env::var(DB_TYPE) {
+            Ok(str) => match DatabaseType::from_str(&str, false) {
+                Ok(t) => t,
+                Err(_) => config.db_type.to_owned()
+            },
+            Err(_) => config.db_type.to_owned()
+        };
+
 
         Ok(Config {
             log_level: config.log_level,
@@ -73,8 +92,9 @@ impl Config {
             db_user,
             db_password,
             db_host,
-            db_port: db_port.parse::<u16>().map_err(|e| Error::ParseError(e))?,
+            db_port: db_port.parse::<u16>().map_err(Error::ParseError)?,
             db_name,
+            db_type,
         })
     }
 }

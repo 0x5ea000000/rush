@@ -2,7 +2,7 @@ use argon2::{password_hash, Error as ArgonError};
 use password_hash::Error as PasswordHashError;
 use reqwest::Error as ReqwestError;
 use reqwest_middleware::Error as MiddlewareReqwestError;
-use tracing::{event, instrument, Level};
+use tracing::{event, Level};
 use warp::{
     filters::{body::BodyDeserializeError, cors::CorsForbidden},
     http::StatusCode,
@@ -25,6 +25,7 @@ pub enum Error {
     MiddlewareReqwestAPIError(MiddlewareReqwestError),
     ClientError(APILayerError),
     ServerError(APILayerError),
+    MemoryDatabaseError,
 }
 
 #[derive(Debug, Clone)]
@@ -41,7 +42,7 @@ impl std::fmt::Display for APILayerError {
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match &*self {
+        match self {
             Error::ParseError(ref err) => write!(f, "Cannot parse parameter: {}", err),
             Error::MissingParameters => write!(f, "Missing parameter"),
             Error::WrongPassword => write!(f, "Wrong password"),
@@ -55,6 +56,8 @@ impl std::fmt::Display for Error {
             Error::MiddlewareReqwestAPIError(err) => write!(f, "External API error: {}", err),
             Error::ClientError(err) => write!(f, "External Client error: {}", err),
             Error::ServerError(err) => write!(f, "External Server error: {}", err),
+            Error::MemoryDatabaseError => write!(f, "Cannot update, invalid data"),
+
         }
     }
 }
@@ -65,7 +68,7 @@ impl Reject for APILayerError {}
 
 const DUPLICATE_KEY: u32 = 23505;
 
-#[instrument]
+
 pub async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
     if let Some(Error::DatabaseQueryError(e)) = r.find() {
         event!(Level::ERROR, "Database query error");

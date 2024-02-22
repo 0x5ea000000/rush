@@ -24,3 +24,4 @@ paseto = "2.0.2"
 dotenv = "0.15.0"
 clap = { version = "4.5.1", features = ["derive"] }
 openssl = { version = "0.10.64", features = ["vendored"] }
+async-trait = { version = "0.1.77", features = [] }
