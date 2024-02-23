@@ -1,13 +1,17 @@
 # Rust-based Ultimate Support Hub (rush)
 
-A brief description of your project goes here.
+A simple Q&A server implemented in Rust with [warp](https://github.com/seanmonstar/warp) framework.
 
 ## Table of Contents
 
+- [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Features
+
 
 ## Installation
 
@@ -28,16 +32,38 @@ Follow these steps to run the project:
 
 1. Navigate to the project directory in your terminal.
 
-2. Build the project using Cargo:
+2. Create `.env` from `.env.example` and fill out all the values
+
+```sh
+cp .env.example .env
+```
+
+3. Build the project using Cargo:
 
 ```sh
 cargo build
 ```
 
-3. Run the project:
+4. Run the project:
 
 ```sh
 cargo run
+```
+
+### Running with Docker
+
+1. Navigate to the project directory in your terminal.
+
+2. Create `.env.docker` from `.env.example` and fill out all the values
+
+```sh
+cp .env.example .env.docker
+```
+
+3. Run `docker-compose.yml` to start Postgres database and our server
+
+```sh
+docker compose up -d --build
 ```
 
 ### Running Tests
@@ -46,14 +72,6 @@ To run tests, use Cargo's built-in testing feature:
 
 ```sh
 cargo test
-```
-
-### Example Usage
-
-If applicable, provide an example of how to use your project:
-
-```sh
-# Example command or code snippet
 ```
 
 ## Contributing
