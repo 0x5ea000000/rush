@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use crate::errors::Error;
+use crate::shared::errors::Error;
 use crate::types::account::{Account, AccountId};
 use crate::types::answer::{Answer, NewAnswer};
 use crate::types::question::{NewQuestion, Question};

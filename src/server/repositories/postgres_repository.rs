@@ -4,8 +4,8 @@ use sqlx::{
     Row,
 };
 
-use crate::errors::Error;
-use crate::repositories::repository::{RepositoryPort};
+use crate::shared::errors::Error;
+use crate::server::repositories::repository::{RepositoryPort};
 use crate::types::{
     account::{Account, AccountId},
     answer::{Answer, AnswerId, NewAnswer},

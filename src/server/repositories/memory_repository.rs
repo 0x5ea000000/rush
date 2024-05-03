@@ -2,8 +2,8 @@
 
 use async_trait::async_trait;
 
-use crate::errors::Error;
-use crate::repositories::repository::{RepositoryPort};
+use crate::shared::errors::Error;
+use crate::server::repositories::repository::{RepositoryPort};
 use crate::stores::memory_store::MemoryStore;
 use crate::types::account::{Account, AccountId};
 use crate::types::answer::{Answer, AnswerId, NewAnswer};

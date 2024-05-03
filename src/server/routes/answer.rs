@@ -1,7 +1,7 @@
 
 
 use warp::http::StatusCode;
-use crate::repositories::repository::Repository;
+use crate::server::repositories::repository::Repository;
 
 use crate::types::account::Session;
 use crate::types::answer::NewAnswer;

@@ -5,7 +5,7 @@ use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use serde::{Deserialize, Serialize};
 use crate::config;
 
-use crate::errors::{APILayerError, Error};
+use crate::shared::errors::{APILayerError, Error};
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

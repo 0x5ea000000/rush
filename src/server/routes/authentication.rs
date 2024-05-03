@@ -8,8 +8,8 @@ use chrono::prelude::*;
 
 use warp::{http::StatusCode, Filter};
 
-use crate::errors::Error;
-use crate::repositories::repository::Repository;
+use crate::shared::errors::Error;
+use crate::server::repositories::repository::Repository;
 use crate::types::account::{Account, AccountId, Session};
 
 

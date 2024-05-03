@@ -3,7 +3,7 @@ use std::env;
 use clap::{Parser, ValueEnum};
 use dotenv::dotenv;
 
-use crate::errors::Error;
+use crate::shared::errors::Error;
 
 pub const GOOGLE_AI_KEY: &str = "GOOGLE_AI_KEY";
 pub const PASETO_KEY: &str = "PASETO_KEY";

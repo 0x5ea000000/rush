@@ -5,9 +5,9 @@ use std::collections::HashMap;
 use tracing::{event, Level};
 use warp::http::StatusCode;
 
-use crate::errors::Error;
-use crate::repositories::repository::Repository;
-use crate::services::google_ai_service::get_ai_content;
+use crate::shared::errors::Error;
+use crate::server::repositories::repository::Repository;
+use crate::server::services::google_ai_service::get_ai_content;
 use crate::types::account::Session;
 use crate::types::answer::NewAnswer;
 use crate::types::pagination::{extract_pagination, Pagination};
